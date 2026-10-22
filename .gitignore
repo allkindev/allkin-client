@@ -1,0 +1,5 @@
+.DS_Store
+/.git.nosync/
+/src-tauri/target/
+/src-tauri/target.nosync/
+/src-tauri/gen/

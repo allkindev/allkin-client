@@ -1,0 +1,99 @@
+# Construit Allkin Client pour macOS (Apple Silicon et Intel), Windows et Linux.
+# Lancement à la main (onglet Actions) : les fichiers restent dans le run.
+# En poussant un tag « v* » : une fois les quatre builds réussis, ils sont
+# publiés ensemble dans la release du tag.
+name: Build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-arm64
+            runner: macos-latest
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+          - name: macos-x64
+            runner: macos-latest
+            target: x86_64-apple-darwin
+            bundles: app,dmg
+          - name: windows-x64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+          - name: linux-x64
+            # La plus ancienne glibc prise en charge : le paquet tourne aussi
+            # sur les distributions plus récentes, pas l'inverse.
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: deb,rpm,appimage
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libxdo-dev librsvg2-dev patchelf file
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target.nosync
+
+      - name: Build
+        working-directory: src-tauri
+        run: npx --yes @tauri-apps/cli@2.12.4 build --ci --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+
+      - name: Collect
+        shell: bash
+        run: |
+          out="src-tauri/target.nosync/${{ matrix.target }}/release"
+          mkdir dist
+          case "${{ matrix.name }}" in
+            macos-*) cp "$out"/bundle/dmg/*.dmg dist/ ;;
+            windows-*)
+              cp "$out"/bundle/nsis/*.exe dist/
+              # Version portable : l'exécutable seul, sans installation.
+              cp "$out"/allkin-client.exe "dist/Allkin Client_x64-portable.exe" ;;
+            linux-*) cp "$out"/bundle/deb/*.deb "$out"/bundle/rpm/*.rpm "$out"/bundle/appimage/*.AppImage dist/ ;;
+          esac
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: allkin-client-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la dist
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Allkin Client ${GITHUB_REF_NAME#v}" \
+            --generate-notes

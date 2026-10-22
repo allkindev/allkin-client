@@ -1,0 +1,4 @@
+# Le projet vit dans iCloud Drive : un dossier « .nosync » n'y est pas
+# synchronisé, ce qui évite d'envoyer des Go d'artefacts de compilation.
+[build]
+target-dir = "target.nosync"

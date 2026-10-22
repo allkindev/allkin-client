@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Fusionné par Tauri dans l'Info.plist de l'application (macOS). -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Allkin Client searches your network for Allkin servers and connects to the one you choose.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allkin can use the microphone when you dictate a message.</string>
+	<!-- Un serveur Allkin se sert souvent en HTTP (http://machine:9191) :
+	     la webview doit pouvoir l'afficher, quel que soit son nom. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>fr</string>
+		<string>es</string>
+		<string>de</string>
+	</array>
+</dict>
+</plist>

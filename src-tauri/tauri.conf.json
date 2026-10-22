@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Allkin Client",
+  "mainBinaryName": "allkin-client",
+  "version": "0.1.0",
+  "identifier": "in.allk.client",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Client de bureau pour les serveurs Allkin",
+    "longDescription": "Affiche l'interface d'un serveur Allkin dans sa propre fenêtre, et trouve les serveurs du réseau local, des VPN et de Tailscale.",
+    "icon": [
+      "icons/icon.png",
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "signingIdentity": "-",
+      "minimumSystemVersion": "11.0",
+      "files": {
+        "Resources/fr.lproj/InfoPlist.strings": "macos/fr.lproj/InfoPlist.strings",
+        "Resources/es.lproj/InfoPlist.strings": "macos/es.lproj/InfoPlist.strings",
+        "Resources/de.lproj/InfoPlist.strings": "macos/de.lproj/InfoPlist.strings"
+      }
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "English",
+          "French",
+          "Spanish",
+          "German"
+        ]
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libssl3 | libssl3t64"
+        ]
+      },
+      "rpm": {
+        "depends": [
+          "openssl-libs"
+        ]
+      }
+    }
+  }
+}
